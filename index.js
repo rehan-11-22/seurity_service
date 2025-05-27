@@ -13,7 +13,7 @@ const userPolicies = require("./routes/userPolicyRoute");
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Middleware setup
 app.use(cors({ origin: "*" }));
@@ -41,17 +41,15 @@ app.use("/uploads", express.static("uploads"));
 
 // Basic route
 app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to the CRUD API",
-    status: "Server is running successfully",
-    timestamp: new Date().toISOString(),
-  });
+  res.send("Welcome to the CRUD API");
 });
 
-// Health check route
-app.get("/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
-});
-
-// For Vercel serverless functions
+// Start the server
 module.exports = app;
+
+// Or for better Vercel compatibility:
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
