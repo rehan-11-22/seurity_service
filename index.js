@@ -3,17 +3,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const http = require("http");
-const setupSocket = require("./socket");
 
 // Routes imports
-
 const userRoutes = require("./routes/userRoute");
 const rolesRoute = require("./routes/roleRoute");
 const userPolicies = require("./routes/userPolicyRoute");
 
 // Load environment variables
-dotenv.config("/.env");
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -44,15 +41,10 @@ app.use("/uploads", express.static("uploads"));
 
 // Basic route
 app.get("/", (req, res) => {
-  res.send("Welcome to the Ims CRUD API");
+  res.send("Welcome to the CRUD API");
 });
 
-const server = http.createServer(app);
-
-const io = setupSocket(server);
-app.set("socketio", io);
-
 // Start the server
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
