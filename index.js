@@ -1,52 +1,57 @@
 const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const cors = require("cors");
-
-// Load environment variables first
-dotenv.config();
 
 // Routes imports
 const userRoutes = require("./routes/userRoute");
 const rolesRoute = require("./routes/roleRoute");
 const userPolicies = require("./routes/userPolicyRoute");
 
+// Load environment variables
+dotenv.config();
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Middleware setup
 app.use(cors({ origin: "*" }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
 
-// MongoDB connection (wrap in async function)
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000,
-    });
-    console.log("Connected to MongoDB...");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-  }
-};
-connectDB();
+// MongoDB connection
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000,
+  })
+  .then(() => console.log("Connected to MongoDB..."))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // Route setup
 app.use("/api/user", userRoutes);
 app.use("/api/roles", rolesRoute);
 app.use("/api", userPolicies);
 
+// Serve uploaded files statically
+app.use("/uploads", express.static("uploads"));
+
 // Basic route
 app.get("/", (req, res) => {
-  res.send("Welcome to the CRUD API");
+  res.json({
+    message: "Welcome to the CRUD API",
+    status: "Server is running successfully",
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Health check endpoint
+// Health check route
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "healthy" });
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-// Export the Express app for Vercel
+// For Vercel serverless functions
 module.exports = app;
